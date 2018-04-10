@@ -58,12 +58,12 @@ function updateInitialLoadingProgress(progress) {
   }
 
   if (progress >= 100) {
-    dlgbox.setAttribute('hidden', '');
+    dlgbox.removeAttribute('visible');
     return;
   }
 
   meter.value = Math.round(progress);
-  dlgbox.removeAttribute('hidden');
+  dlgbox.setAttribute('visible', '');
 }
 
 function run() {
