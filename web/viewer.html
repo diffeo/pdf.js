@@ -388,56 +388,6 @@ See https://github.com/adobe-type-tools/cmap-resources
     <div id="printContainer"></div>
 
     <div id="loading-dlgbox" hidden>
-      <style scoped>
-       #loading-dlgbox {
-         position: fixed;
-         top: 0;
-         left: 0;
-         height: 100%;
-         width: 100%;
-         z-index: 9999999;
-
-         display: block;
-         text-align: center;
-         background-color: rgba(0, 0, 0, 0.5);
-       }
-
-       #loading-dlgbox[hidden] {
-         display: none;
-       }
-
-       #loading-dlgbox .loading-dlgbox-inner {
-         display: inline-block;
-         position: relative;
-         margin: -50px auto 0;
-         padding: 9px;
-         top: 45%;
-         left: 0;
-         min-width: 220px;
-         max-width: 400px;
-
-         border: 1px solid hsla(0, 0%, 0%, .5);
-         border-radius: 2px;
-         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-         background-color: #474747;
-
-         color: hsl(0, 0%, 85%);
-         font-size: 16px;
-         line-height: 20px;
-       }
-
-       #loading-dlgbox progress {
-         margin: 1em 0;
-         width: 100%;
-         color: #3b5b6f;
-         text-align: center;
-       }
-
-       #loading-dlgbox progress:after {
-         content: attr(value)'%';
-       }
-      </style>
-
       <div class="loading-dlgbox-inner">
         Please wait while rendering pages...
         <progress value="0" max="100"></progress>
