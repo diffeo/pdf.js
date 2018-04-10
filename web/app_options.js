@@ -118,6 +118,11 @@ const defaultOptions = {
     value: 0,
     kind: OptionKind.VIEWER,
   },
+  keepTextLayers: {
+    /** @type {boolean} */
+    value: true,
+    kind: OptionKind.VIEWER,
+  },
   textLayerMode: {
     /** @type {number} */
     value: 1,

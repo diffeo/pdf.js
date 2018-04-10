@@ -118,6 +118,7 @@ class BaseViewer {
     this.linkService = options.linkService || new SimpleLinkService();
     this.downloadManager = options.downloadManager || null;
     this.removePageBorders = options.removePageBorders || false;
+    this.keepTextLayers = options.keepTextLayers || false;
     this.textLayerMode = Number.isInteger(options.textLayerMode) ?
       options.textLayerMode : TextLayerMode.ENABLE;
     this.enhanceTextSelection = options.enhanceTextSelection || false;
@@ -389,6 +390,7 @@ class BaseViewer {
           scale,
           defaultViewport: viewport.clone(),
           renderingQueue: this.renderingQueue,
+          keepTextLayer: this.keepTextLayers,
           textLayerFactory,
           textLayerMode: this.textLayerMode,
           annotationLayerFactory: this,

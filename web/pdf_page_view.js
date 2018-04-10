@@ -76,6 +76,7 @@ class PDFPageView {
     this.viewport = defaultViewport;
     this.pdfPageRotate = defaultViewport.rotation;
     this.hasRestrictedScaling = false;
+    this.keepTextLayer = options.keepTextLayer || false;
     this.textLayerMode = Number.isInteger(options.textLayerMode) ?
       options.textLayerMode : TextLayerMode.ENABLE;
     this.imageResourcesPath = options.imageResourcesPath || '';
@@ -164,9 +165,19 @@ class PDFPageView {
     let currentZoomLayerNode = (keepZoomLayer && this.zoomLayer) || null;
     let currentAnnotationNode = (keepAnnotations && this.annotationLayer &&
                                  this.annotationLayer.div) || null;
+    let currentTextLayerNode = (this.keepTextLayer && this.textLayer &&
+                                this.textLayer.textLayerDiv) || null;
     for (let i = childNodes.length - 1; i >= 0; i--) {
       let node = childNodes[i];
-      if (currentZoomLayerNode === node || currentAnnotationNode === node) {
+      // Retain text layer nodes only if they contain children nodes of their
+      // own.  This is because in some edge cases where the initial page
+      // position is p > 0 (where p refers to the page number), rendering of
+      // all pages causes the first page (p = 0) to contain an empty text layer
+      // node in addition to the rendered text layer node.  This duplication is
+      // undesirable and is prevented here by allowing only the empty node to
+      // be removed.
+      if (currentZoomLayerNode === node || currentAnnotationNode === node ||
+          (currentTextLayerNode === node && node.childNodes.length > 0)) {
         continue;
       }
       div.removeChild(node);
@@ -267,7 +278,7 @@ class PDFPageView {
     this.renderingState = RenderingStates.INITIAL;
     this.resume = null;
 
-    if (this.textLayer) {
+    if (!this.keepTextLayer && this.textLayer) {
       this.textLayer.cancel();
       this.textLayer = null;
     }

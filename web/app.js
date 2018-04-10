@@ -188,6 +188,9 @@ let PDFViewerApplication = {
       preferences.get('defaultZoomValue').then(function resolved(value) {
         AppOptions.set('defaultZoomValue', value);
       }),
+      preferences.get('keepTextLayers').then(function resolved(value) {
+        AppOptions.set('keepTextLayers', value);
+      }),
       preferences.get('textLayerMode').then(function resolved(value) {
         if (AppOptions.get('textLayerMode') === TextLayerMode.DISABLE) {
           return;
@@ -374,6 +377,7 @@ let PDFViewerApplication = {
         renderer: AppOptions.get('renderer'),
         enableWebGL: AppOptions.get('enableWebGL'),
         l10n: this.l10n,
+        keepTextLayers: AppOptions.get('keepTextLayers'),
         textLayerMode: AppOptions.get('textLayerMode'),
         imageResourcesPath: AppOptions.get('imageResourcesPath'),
         renderInteractiveForms: AppOptions.get('renderInteractiveForms'),
