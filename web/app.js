@@ -488,7 +488,7 @@ let PDFViewerApplication = {
   },
 
   run(config) {
-    this.initialize(config).then(webViewerInitialized);
+    return this.initialize(config).then(webViewerInitialized);
   },
 
   zoomIn(ticks) {
