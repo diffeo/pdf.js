@@ -49,15 +49,21 @@ function renderNextPage() {
 }
 
 function updateInitialLoadingProgress(progress) {
-  const progressDlgBox = document.getElementById('loading-dlgbox');
-  if (progress >= 100) {
-    progressDlgBox.setAttribute('hidden', '');
+  let dlgbox, meter;
+  try {
+    dlgbox = document.getElementById('loading-dlgbox');
+    meter = dlgbox.querySelector('progress');
+  } catch (x) {
     return;
   }
 
-  const progressBar = progressDlgBox.querySelector('progress');
-  progressBar.value = Math.round(progress);
-  progressDlgBox.removeAttribute('hidden');
+  if (progress >= 100) {
+    dlgbox.setAttribute('hidden', '');
+    return;
+  }
+
+  meter.value = Math.round(progress);
+  dlgbox.removeAttribute('hidden');
 }
 
 function run() {
