@@ -402,6 +402,15 @@ class PDFPageView {
 
     let textLayer = null;
     if (this.textLayerMode !== TextLayerMode.DISABLE && this.textLayerFactory) {
+      // We do not allow the text layer to ever be removed from the DOM if
+      // `keepTextLayer` is `true` (see `reset` above).  This means, however,
+      // that we can end up with multiple text layers if the view is rendered
+      // once again.  To prevent this from happening, the existing text layer
+      // is removed, if it exists, before proceeding with its (re-)creation.
+      if (this.textLayer && this.textLayer.textLayerDiv) {
+        this.textLayer.textLayerDiv.remove();
+      }
+
       let textLayerDiv = document.createElement('div');
       textLayerDiv.className = 'textLayer';
       textLayerDiv.style.width = canvasWrapper.style.width;
