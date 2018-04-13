@@ -2,6 +2,13 @@
 
 import { RenderingStates } from './pdf_rendering_queue';
 
+const INTERVAL_RESUME_RENDER = 250;
+
+// The view currently being rendered.
+let renderingView = null;
+
+// The interval timer used to check that the view being rendered isn't paused by the renderer.
+let timer = null;
 
 function forEachView(callback) {
   // Iterating from the last page on up since the user will, in most cases, be
@@ -42,6 +49,7 @@ function renderNextPage() {
     //
     //   <div class="endOfContent active"></div>
     if (!view.textLayer || view.textLayer.textLayerDiv.childNodes.length < 1) {
+      renderingView = view;
       view.renderingQueue.renderView(view);
       return true;
     }
@@ -66,6 +74,31 @@ function updateInitialLoadingProgress(progress) {
   dlgbox.setAttribute('visible', '');
 }
 
+function startTimer() {
+  stopTimer();
+  timer = setInterval(onResumeRender, INTERVAL_RESUME_RENDER);
+}
+
+function stopTimer() {
+  if (timer != null) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+function onResumeRender() {
+  // The rendering engine may, in some circumstances, decide to pause rendering
+  // a page it had been instructed to render.  Since we want all the views to
+  // render in the order we specify, we make sure that the view currently being
+  // rendered doesn't enter the paused state.  When it does, we forcefully
+  // resume its rendering.  This check is meant to be carried out in an
+  // interval-type timer.
+  if (renderingView != null &&
+      renderingView.renderingState === RenderingStates.PAUSED) {
+    renderingView.renderingQueue.renderView(renderingView);
+  }
+}
+
 function run() {
   const app = PDFViewerApplication;
   if (!app.pdfViewer.keepTextLayers) {
@@ -74,6 +107,8 @@ function run() {
 
   const rendered = {};
   const onRendered = function(ev) {
+    stopTimer();
+
     const num = ev.pageNumber - 1;
     if (rendered[num] === true) {
       console.warn(`page already rendered: ${num}`);
@@ -91,6 +126,7 @@ function run() {
     if (getAllRenderPromises().length > 0) {
       return;
     } else if (done < count) {
+      startTimer();
       renderNextPage();
       return;
     }
