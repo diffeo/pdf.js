@@ -16,5 +16,6 @@
   "renderInteractiveForms": false,
   "enablePrintAutoRotate": false,
   "disablePageMode": false,
-  "disablePageLabels": false
+  "disablePageLabels": false,
+  "keepTextLayers": true
 }
