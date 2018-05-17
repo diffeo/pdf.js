@@ -64,15 +64,26 @@ const DEFAULT_CACHE_SIZE = 10;
 
 function PDFPageViewBuffer(size) {
   let data = [];
-  this.push = function(view) {
-    let i = data.indexOf(view);
+  this.push = function(view, retain = new Set()) {
+    const i = data.indexOf(view);
     if (i >= 0) {
       data.splice(i, 1);
     }
+
     data.push(view);
-    if (data.length > size) {
-      data.shift().destroy();
+    if (data.length <= size) {
+      return;
     }
+
+    for (let j = 0; j < data.length - 1; ++j) {
+      if (!retain.has(data[j].id)) {
+        data[j].destroy();
+        data.splice(j, 1);
+        return;
+      }
+    }
+
+    data.shift().destroy();
   };
   this.resize = function(newSize) {
     size = newSize;
@@ -357,10 +368,11 @@ class BaseViewer {
 
     let bindOnAfterAndBeforeDraw = (pageView) => {
       pageView.onBeforeDraw = () => {
+        const visiblePages = this._getVisiblePages();
         // Add the page to the buffer at the start of drawing. That way it can
         // be evicted from the buffer and destroyed even if we pause its
         // rendering.
-        this._buffer.push(pageView);
+        this._buffer.push(pageView, new Set(visiblePages.views.map((v) => v.id)));
       };
       pageView.onAfterDraw = () => {
         if (!isOnePageRenderedResolved) {
