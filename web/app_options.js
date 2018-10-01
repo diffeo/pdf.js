@@ -31,6 +31,7 @@ const defaultOptions = {
   defaultUrl: {
     /** @type {string} */
     value: 'compressed.tracemonkey-pldi-09.pdf',
+    value: 'test.pdf',
     kind: OptionKind.VIEWER,
   },
   defaultZoomValue: {
@@ -120,7 +121,7 @@ const defaultOptions = {
   },
   keepTextLayers: {
     /** @type {boolean} */
-    value: true,
+    value: false,
     kind: OptionKind.VIEWER,
   },
   textLayerMode: {

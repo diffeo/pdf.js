@@ -130,6 +130,7 @@ function onDocumentLoaded() {
   const app = PDFViewerApplication;
   const pdfViewer = app.pdfViewer;
   if (!pdfViewer.keepTextLayers) {
+    notify(true);
     return;
   } else if (pdfViewer.pagesCount > MAX_CACHE_SIZE) {
     alert(`\
@@ -181,13 +182,20 @@ Contact support for additional information.`);
     console.info('all pages rendered.');
     app.eventBus.off('textlayerrendered', onRendered);
 
-    const event = new CustomEvent('documentrendered', { detail: { enableHighlights, }, });
-    document.dispatchEvent(event);
+    notify(enableHighlights);
   };
 
   // Show loading dialog box and start listening to text layer events.
   updateInitialLoadingProgress(0);
   app.eventBus.on('textlayerrendered', onRendered);
+}
+
+function notify(enableHighlights) {
+  const event = new CustomEvent(
+    'documentrendered',
+    { detail: { enableHighlights, }, }
+  );
+  document.dispatchEvent(event);
 }
 
 function init(app) {

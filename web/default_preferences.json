@@ -17,5 +17,5 @@
   "enablePrintAutoRotate": false,
   "disablePageMode": false,
   "disablePageLabels": false,
-  "keepTextLayers": true
+  "keepTextLayers": false
 }
