@@ -191,7 +191,8 @@ function webViewerLoad() {
       window.PDFViewerApplication = app.PDFViewerApplication;
       window.PDFViewerApplicationOptions = appOptions.AppOptions;
       fullTextRender = otherModules[2];
-      app.PDFViewerApplication.run(config).then(fullTextRender.run);
+      app.PDFViewerApplication.run(config)
+         .then(() => fullTextRender.init(app.PDFViewerApplication));
     });
   } else {
     if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('CHROME')) {
@@ -200,7 +201,8 @@ function webViewerLoad() {
 
     window.PDFViewerApplication = pdfjsWebApp.PDFViewerApplication;
     window.PDFViewerApplicationOptions = pdfjsWebAppOptions.AppOptions;
-    pdfjsWebApp.PDFViewerApplication.run(config).then(fullTextRender.run);
+    pdfjsWebApp.PDFViewerApplication.run(config)
+               .then(() => fullTextRender.init(pdfjsWebApp.PDFViewerApplication));
   }
 }
 

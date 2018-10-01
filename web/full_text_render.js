@@ -3,6 +3,8 @@
 import { RenderingStates } from './pdf_rendering_queue';
 
 const INTERVAL_RESUME_RENDER = 250;
+const MAX_CACHE_SIZE = 100;
+const MAX_AVG_WORD_LENGTH = 10;
 
 // The view currently being rendered.
 let renderingView = null;
@@ -86,6 +88,31 @@ function stopTimer() {
   }
 }
 
+function calculateAverageWordLength(totalPages) {
+  // Make sure that the document supports highlights by calculating its
+  // average word length.
+  let len = 0, words = 0;
+  for (let p = 1; p <= totalPages; ++p) {
+    const container = document.querySelector(
+      `#viewer .page[data-page-number="${p}"]`);
+    if (container == null) {
+      console.error('failed to locate page container for:', p);
+      continue;
+    }
+
+    const text = container.textContent;
+    len += text.length;
+    const pwords = text.split(/\s+/).length;
+    words += pwords;
+    len -= pwords; // subtract 1 space per word from total length
+  }
+
+  const avg = len / words;
+  console.log('average word length: %s [len=%d][words=%d]',
+              avg.toFixed(2), len, words);
+  return avg;
+}
+
 function onResumeRender() {
   // The rendering engine may, in some circumstances, decide to pause rendering
   // a page it had been instructed to render.  Since we want all the views to
@@ -99,9 +126,17 @@ function onResumeRender() {
   }
 }
 
-function run() {
+function onDocumentLoaded() {
   const app = PDFViewerApplication;
-  if (!app.pdfViewer.keepTextLayers) {
+  const pdfViewer = app.pdfViewer;
+  if (!pdfViewer.keepTextLayers) {
+    return;
+  } else if (pdfViewer.pagesCount > MAX_CACHE_SIZE) {
+    alert(`\
+It is not possible to enable highlights in this document because it is too \
+large.
+
+Contact support for additional information.`);
     return;
   }
 
@@ -116,7 +151,7 @@ function run() {
       rendered[num] = true;
     }
 
-    const count = PDFViewerApplication.pagesCount;
+    const count = app.pagesCount;
     const done = Object.keys(rendered).length;
     console.log(`page rendered: ${num} (${done}/${count})`);
     updateInitialLoadingProgress(done / count * 100);
@@ -131,13 +166,22 @@ function run() {
       return;
     }
 
+    const wordLen = calculateAverageWordLength(count);
+    const enableHighlights = wordLen > 1 && wordLen < MAX_AVG_WORD_LENGTH;
+    if (!enableHighlights) {
+      alert(`\
+Unfortunately, the format used to produce this document is unsupported and \
+consequently highlights will not be available.
+
+Contact support for additional information.`);
+    }
+
     // All pages rendered.  Clean up state and fire custom event to let
     // application know document is ready for use.
     console.info('all pages rendered.');
     app.eventBus.off('textlayerrendered', onRendered);
 
-    const event = document.createEvent('CustomEvent');
-    event.initCustomEvent('documentrendered', false, false, {});
+    const event = new CustomEvent('documentrendered', { detail: { enableHighlights, }, });
     document.dispatchEvent(event);
   };
 
@@ -146,4 +190,8 @@ function run() {
   app.eventBus.on('textlayerrendered', onRendered);
 }
 
-export { run, };
+function init(app) {
+  app.eventBus.on('documentload', onDocumentLoaded);
+}
+
+export { init, };
