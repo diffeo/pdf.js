@@ -6,6 +6,8 @@ const INTERVAL_RESUME_RENDER = 250;
 const MAX_CACHE_SIZE = 100;
 const MAX_AVG_WORD_LENGTH = 10;
 
+let loadResult = null;
+
 // The view currently being rendered.
 let renderingView = null;
 
@@ -129,8 +131,11 @@ function onResumeRender() {
 function onDocumentLoaded() {
   const app = PDFViewerApplication;
   const pdfViewer = app.pdfViewer;
-  if (!pdfViewer.keepTextLayers) {
-    notify(true);
+
+  if (loadResult != null) {
+    throw new Error('Document already loaded');
+  } else if (!pdfViewer.keepTextLayers) {
+    terminate(true);
     return;
   } else if (pdfViewer.pagesCount > MAX_CACHE_SIZE) {
     alert(`\
@@ -182,12 +187,28 @@ Contact support for additional information.`);
     console.info('all pages rendered.');
     app.eventBus.off('textlayerrendered', onRendered);
 
-    notify(enableHighlights);
+    terminate(enableHighlights);
   };
 
   // Show loading dialog box and start listening to text layer events.
   updateInitialLoadingProgress(0);
   app.eventBus.on('textlayerrendered', onRendered);
+}
+
+// "documentwait" event
+//
+// Dispatched by DfB, and possibly other clients, to signal their readiness to process the PDF
+// document.  If the document has finished loading, the "documentrendered" event is generated
+// immediately.
+function onWaiting() {
+  if (loadResult != null) {
+    notify(loadResult.enableHighlights);
+  }
+}
+
+function terminate(enableHighlights) {
+  loadResult = { enableHighlights, };
+  notify(enableHighlights);
 }
 
 function notify(enableHighlights) {
@@ -199,6 +220,7 @@ function notify(enableHighlights) {
 }
 
 function init(app) {
+  document.addEventListener('documentwait', onWaiting);
   app.eventBus.on('documentload', onDocumentLoaded);
 }
 
